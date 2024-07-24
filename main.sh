@@ -30,6 +30,23 @@ clear
 exit 0
 }
 
+function unPatchSteamLaunchOptions() {
+    CONFIG_FILES=~/.local/share/Steam/userdata/*/config/localconfig.vdf
+    INSERT_LINE='WINEDLLOVERRIDES'
+
+    for file in $CONFIG_FILES; 
+    do
+        if [ -f "$file" ]; then
+            sed -i.bak "/$INSERT_LINE/d" "$file"
+            echo "Line containing phrase '$INSERT_LINE' deleted from $file."
+        else
+            echo "No matching file found: $file"
+        fi
+    done
+
+    notify-send "Line containing phrase '$INSERT_LINE' deleted from files."
+}
+
 function patchSteamLaunchOptions() {
     dialog --title "Input Path" \
            --inputbox "Please enter the path with GD installed:" 8 40 2> path.txt
@@ -37,7 +54,6 @@ function patchSteamLaunchOptions() {
     local gd_installation_path=$(<path.txt)
     rm path.txt
 
-    notify-send $gd_installation_path
     cd "$gd_installation_path"
     files=$(ls -r | grep -i XInput)
     xinputvar=$(echo "$files" | tr '[:upper:]' '[:lower:]' | sed 's/\.dll//')
